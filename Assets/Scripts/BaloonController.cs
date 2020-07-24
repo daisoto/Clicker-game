@@ -1,47 +1,62 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class BaloonController : MonoBehaviour
 {
-    public GameObject scores;
+    public GameObject particles;
+    public float speed;
 
+    GameObject canvas;
+    UIController uIController;
     Rigidbody2D rb;
-    float speed;
     Color color;
     Transform thisTransform;
-    Vector3 currentAngle;
+    string scoreString;
+    int points;
 
-    void GetColor()
+    Color GetColor()
     {
         float r = UnityEngine.Random.Range(0f, 1f);
         float g = UnityEngine.Random.Range(0f, 1f);
         float b = UnityEngine.Random.Range(0f, 1f);
-        float a = UnityEngine.Random.Range(0f, 1f);
 
-        return Color(r, g, b, a);
+        return new Color(r, g, b);
     }
 
-    void OnMouseClck()
+    void SetSize()
     {
+    	float size = UnityEngine.Random.Range(0.2f, 0.4f);
+    	thisTransform.localScale = new Vector2(size, size);
+    	points = (int)Math.Round(0.4f / size, 0); // очки за шарик зависят от его размера
+    }
 
+    void Move()
+    {
+        rb.velocity = new Vector2(speed, 0);
+    }
+
+    void OnMouseDown()
+    {
+        Instantiate(particles);
+        uIController.scoreNum += points;
+        Destroy(gameObject);
     }
 
     void Start()
     {
+    	canvas = GameObject.Find("Canvas");
+        rb = GetComponent<Rigidbody2D>();
+        uIController = canvas.GetComponent<UIController>();
+        thisTransform = transform;
+
         GetComponent<SpriteRenderer>().color = GetColor();
+        SetSize();
     }
 
     void Update()
     {
-        if(Mathf.Abs((thisTransform.eulerAngles - targetAngle).magnitude) < 2f)
-    		if (targetAngle.z == 20) 
-    			targetAngle = new Vector3(0, 0, 340);
-    		else
-    			targetAngle = new Vector3(0, 0, 20); 
-
-    	currentAngle = new Vector3(0, 0, Mathf.LerpAngle(currentAngle.z, targetAngle.z, Time.deltaTime * 5));
-
-        thisTransform.eulerAngles = currentAngle; 
+        Move();
     }
 }
